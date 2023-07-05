@@ -33,7 +33,11 @@ const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
-      res.send(user);
+      if (user) {
+        res.send(user);
+      } else {
+        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
