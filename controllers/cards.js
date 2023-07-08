@@ -1,9 +1,7 @@
 const { isValidObjectId } = require('mongoose');
 const Card = require('../models/card');
 
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const INTERNAL_SERVER_ERROR = 500;
+const { BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../utils/errors');
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -45,7 +43,7 @@ const deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки.' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
       }
@@ -68,7 +66,7 @@ const likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       } else if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       } else {
@@ -93,7 +91,7 @@ const dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       } else if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка.' });
       } else {

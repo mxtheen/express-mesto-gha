@@ -47,7 +47,7 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден. ' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске профиля.' });
       } else if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске профиля.' });
       } else {
@@ -62,12 +62,12 @@ const updateUserData = (req, res) => {
       if (data) {
         res.send(data);
       } else {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден.' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       } else if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       } else {
@@ -80,7 +80,11 @@ const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((data) => {
-      res.send(data);
+      if (data) {
+        res.send(data);
+      } else {
+        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
