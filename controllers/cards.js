@@ -1,3 +1,4 @@
+const { isValidObjectId } = require('mongoose');
 const Card = require('../models/card');
 
 const BAD_REQUEST = 400;
@@ -30,6 +31,10 @@ const getCards = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
+  if (!isValidObjectId(cardId)) {
+    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+    return;
+  }
   Card.findByIdAndRemove(cardId)
     .then((data) => {
       if (data) {
@@ -49,6 +54,10 @@ const deleteCard = (req, res) => {
 
 const likeCard = (req, res) => {
   const { cardId } = req.params;
+  if (!isValidObjectId(cardId)) {
+    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+    return;
+  }
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((data) => {
       if (data) {
@@ -70,6 +79,10 @@ const likeCard = (req, res) => {
 
 const dislikeCard = (req, res) => {
   const { cardId } = req.params;
+  if (!isValidObjectId(cardId)) {
+    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+    return;
+  }
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((data) => {
       if (data) {

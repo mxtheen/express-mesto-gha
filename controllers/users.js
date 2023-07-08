@@ -1,3 +1,5 @@
+const { isValidObjectId } = require('mongoose');
+
 const User = require('../models/user');
 
 const BAD_REQUEST = 400;
@@ -21,8 +23,8 @@ const createUser = (req, res) => {
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((userList) => {
-      res.send({ data: userList });
+    .then((data) => {
+      res.send(data);
     })
     .catch((err) => {
       res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
@@ -31,6 +33,10 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
+  if (!isValidObjectId(userId)) {
+    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске профиля.' });
+    return;
+  }
   User.findById(userId)
     .then((user) => {
       if (user) {
