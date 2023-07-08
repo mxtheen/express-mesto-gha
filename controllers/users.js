@@ -21,8 +21,8 @@ const createUser = (req, res) => {
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((data) => {
-      res.send(data);
+    .then((userList) => {
+      res.send({ data: userList });
     })
     .catch((err) => {
       res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
