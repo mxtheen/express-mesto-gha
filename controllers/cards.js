@@ -2,7 +2,7 @@ const { isValidObjectId } = require('mongoose');
 const Card = require('../models/card');
 
 const {
-  BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED,
+  BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, FORBIDDEN,
 } = require('../utils/errors');
 
 const createCard = (req, res) => {
@@ -40,7 +40,7 @@ const deleteCard = (req, res) => {
       if (!data) {
         return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
       } if (!data.owner.equals(req.user.id)) {
-        return res.status(UNAUTHORIZED).send({ message: 'Недостаточно прав для удаления карточки' });
+        return res.status(FORBIDDEN).send({ message: 'Недостаточно прав для удаления карточки' });
       }
       return res.send(data);
     })
