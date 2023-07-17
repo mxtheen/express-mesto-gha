@@ -42,7 +42,7 @@ const deleteCard = (req, res) => {
       } if (!data.owner.equals(req.user.id)) {
         return res.status(UNAUTHORIZED).send({ message: 'Недостаточно прав для удаления карточки' });
       }
-      res.send(data);
+      return res.send(data);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
