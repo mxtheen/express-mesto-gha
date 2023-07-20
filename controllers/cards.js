@@ -1,77 +1,78 @@
 const { isValidObjectId } = require('mongoose');
 const Card = require('../models/card');
 
-const {
-  BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, FORBIDDEN,
-} = require('../utils/errors');
+const { CREATED } = require('../utils/statusCodes');
+const BadRequestError = require('../utils/errors/BadRequestError');
+const NotFoundError = require('../utils/errors/NotFoundError');
+const ForbiddenError = require('../utils/errors/ForbiddenError');
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user.id })
     .then((card) => {
-      res.send(card);
+      res.status(CREATED).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: err.message });
+        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+        next(err);
       }
     });
 };
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find()
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+      next(err);
     });
 };
 
-const getCardById = (req, res) => {
+const getCardById = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
     .then((data) => {
       if (data) {
         res.send(data);
       } else {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new NotFoundError('Карточка с указанным _id не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске карточки.' });
+        next(new BadRequestError('Переданы некорректные данные при поиске карточки.'));
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+        next(err);
       }
     });
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
     .then((data) => {
       if (!data) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new NotFoundError('Карточка с указанным _id не найдена.'));
       } if (!data.owner.equals(req.user.id)) {
-        return res.status(FORBIDDEN).send({ message: 'Недостаточно прав для удаления карточки' });
+        next(new ForbiddenError('Недостаточно прав для удаления карточки'));
       }
       return res.send(data);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки.' });
+        next(new BadRequestError('Переданы некорректные данные для удаления карточки.'));
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+        next(err);
       }
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   const { cardId } = req.params;
   if (!isValidObjectId(cardId)) {
-    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные при поиске карточки.' });
+    next(new BadRequestError('Переданы некорректные данные при поиске карточки.'));
     return;
   }
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user.id } }, { new: true })
@@ -79,22 +80,22 @@ const likeCard = (req, res) => {
       if (data) {
         res.send(data);
       } else {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new NotFoundError('Карточка с указанным _id не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+        next(new BadRequestError('Переданы некорректные данные для лайка карточки.'));
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+        next(err);
       }
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
   if (!isValidObjectId(cardId)) {
-    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные при поиске карточки.' });
+    next(new BadRequestError('Переданы некорректные данные при поиске карточки.'));
     return;
   }
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user.id } }, { new: true })
@@ -102,14 +103,14 @@ const dislikeCard = (req, res) => {
       if (data) {
         res.send(data);
       } else {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new NotFoundError('Карточка с указанным _id не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка.' });
+        next(new BadRequestError('Переданы некорректные данные для дизлайка карточки.'));
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+        next(err);
       }
     });
 };

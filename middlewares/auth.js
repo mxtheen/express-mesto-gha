@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 const jwt = require('jsonwebtoken');
-const { UNAUTHORIZED } = require('../utils/errors');
+const { UNAUTHORIZED } = require('../utils/statusCodes');
 
 const handleAuthError = (res) => {
   res.status(UNAUTHORIZED).send({ message: 'Ошибка авторизации' });
