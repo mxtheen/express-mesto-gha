@@ -26,11 +26,14 @@ const userSchema = new mongoose.Schema({
       validator: (v) => validator.isEmail(v),
       message: 'Ошибка при вводе поля email',
     },
+    minlength: 4,
+    maxlength: 50,
   },
   password: {
     type: String,
     required: true,
-    minlength: 8,
+    minlength: 4,
+    maxlength: 60,
     select: false,
   },
 });
