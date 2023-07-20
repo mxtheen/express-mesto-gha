@@ -16,7 +16,9 @@ const createUser = (req, res) => {
       name, about, avatar, email, password: hash,
     }))
     .then(() => {
-      res.send({ message: 'Пользователь успешно создан!' });
+      res.send({
+        name, about, avatar, email,
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
