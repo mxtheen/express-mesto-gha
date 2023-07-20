@@ -31,10 +31,6 @@ const getCards = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
-  if (!isValidObjectId(cardId)) {
-    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные при поиске карточки.' });
-    return;
-  }
   Card.findByIdAndRemove(cardId)
     .then((data) => {
       if (!data) {
