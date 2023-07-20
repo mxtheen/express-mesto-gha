@@ -10,7 +10,7 @@ const cardsRouter = require('./routes/cards');
 const { PORT = 3000, BASE_PATH = 'localhost' } = process.env;
 const { login, createUser } = require('./controllers/users');
 const { authMiddleware } = require('./middlewares/auth');
-const { validationLogin, validationCreateUser } = require('./middlewares/celebrate');
+const { validationLogin, validationCreateUser } = require('./middlewares/celebrate/user');
 
 const { NOT_FOUND } = require('./utils/errors');
 

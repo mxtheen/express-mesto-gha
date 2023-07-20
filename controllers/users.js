@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const {
-  BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED,
+  BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED, CONFLICT,
 } = require('../utils/errors');
 
 const createUser = (req, res) => {
@@ -21,6 +21,8 @@ const createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+      } else if (err.code === 11000) {
+        res.status(CONFLICT).send({ message: `На сервере произошла ошибка: ${err.message}` });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.message}` });
       }
@@ -40,7 +42,7 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
   if (!isValidObjectId(userId)) {
-    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске профиля.' });
+    res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске профиля' });
     return;
   }
   User.findById(userId)
@@ -59,9 +61,28 @@ const getUserById = (req, res) => {
       }
     });
 };
+
+const getCurrentUserData = (req, res) => {
+  User.findById(req.user.id)
+    .then((data) => {
+      if (data) {
+        res.send(data);
+      } else {
+        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+      }
+    });
+};
+
 const updateUserData = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user.id, { name, about }, { new: true, runValidators: true })
     .then((data) => {
       if (data) {
         res.send(data);
@@ -80,7 +101,7 @@ const updateUserData = (req, res) => {
 
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user.id, { avatar }, { new: true, runValidators: true })
     .then((data) => {
       if (data) {
         res.send(data);
@@ -126,4 +147,5 @@ module.exports = {
   updateUserData,
   updateUserAvatar,
   login,
+  getCurrentUserData,
 };

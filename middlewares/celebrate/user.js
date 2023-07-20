@@ -1,6 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 
-const linkRegExp = /(https?:\/\/)(w+:\.)?((\S+)(:\d{2,5})|((\w-?)+\.+))(:\d{2,5})?((\/.+)+)?\/?#?/;
+const { linkRegExp } = require('../../utils/regEpx');
 
 const validationLogin = celebrate({
   body: Joi.object().keys({
@@ -21,6 +21,12 @@ const validationCreateUser = celebrate({
   }),
 });
 
+const validationGetUserById = celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().required().length(24),
+  }),
+});
+
 const validationUpdateUserData = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -33,18 +39,10 @@ const validationUpdateUserAvatar = celebrate({
     avatar: Joi.string().pattern(linkRegExp),
   }),
 });
-
-const validationCreateCard = celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().required().pattern(linkRegExp),
-  }),
-});
-
 module.exports = {
   validationLogin,
   validationCreateUser,
   validationUpdateUserData,
   validationUpdateUserAvatar,
-  validationCreateCard,
+  validationGetUserById,
 };

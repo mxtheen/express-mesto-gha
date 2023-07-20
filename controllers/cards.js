@@ -29,6 +29,25 @@ const getCards = (req, res) => {
     });
 };
 
+const getCardById = (req, res) => {
+  const { cardId } = req.params;
+  Card.findById(cardId)
+    .then((data) => {
+      if (data) {
+        res.send(data);
+      } else {
+        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при поиске карточки.' });
+      } else {
+        res.status(INTERNAL_SERVER_ERROR).send({ message: `На сервере произошла ошибка: ${err.name}` });
+      }
+    });
+};
+
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
@@ -55,7 +74,7 @@ const likeCard = (req, res) => {
     res.status(BAD_REQUEST).send({ message: 'Переданы некорректные при поиске карточки.' });
     return;
   }
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user.id } }, { new: true })
     .then((data) => {
       if (data) {
         res.send(data);
@@ -78,7 +97,7 @@ const dislikeCard = (req, res) => {
     res.status(BAD_REQUEST).send({ message: 'Переданы некорректные при поиске карточки.' });
     return;
   }
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user.id } }, { new: true })
     .then((data) => {
       if (data) {
         res.send(data);
@@ -101,4 +120,5 @@ module.exports = {
   deleteCard,
   likeCard,
   dislikeCard,
+  getCardById,
 };
