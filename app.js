@@ -17,7 +17,9 @@ const { serverErrorHandler } = require('./middlewares/serverErrorHandler');
 
 const NotFoundError = require('./utils/errors/NotFoundError');
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
+  .then(() => console.log('Подключено к MongoDB'));
+
 app.use(cors());
 
 app.use(helmet());
