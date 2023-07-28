@@ -129,12 +129,12 @@ const loginUser = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        next(new UnauthorizedError('Неправильная почта или пароль'));
+        return next(new UnauthorizedError('Неправильная почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            next(new UnauthorizedError('Неправильная почта или пароль'));
+            return next(new UnauthorizedError('Неправильная почта или пароль'));
           }
           return res.send({ token: jwt.sign({ id: user._id }, 'super-strong-secret', { expiresIn: '7d' }) });
         });
