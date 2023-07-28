@@ -1,6 +1,7 @@
 const express = require('express');
 
 const app = express();
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -8,7 +9,7 @@ const { errors } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
-const { PORT = 3000, BASE_PATH = 'localhost' } = process.env;
+const { PORT = 3000 } = process.env;
 const { loginUser, createUser } = require('./controllers/users');
 const { authMiddleware } = require('./middlewares/auth');
 const { validationLogin, validationCreateUser } = require('./middlewares/celebrate/user');
@@ -17,6 +18,7 @@ const { serverErrorHandler } = require('./middlewares/serverErrorHandler');
 const NotFoundError = require('./utils/errors/NotFoundError');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+app.use(cors());
 
 app.use(helmet());
 
@@ -38,5 +40,5 @@ app.use(serverErrorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`Сервер запущен по адресу: ${BASE_PATH}:${PORT}`);
+  console.log(`Сервер запущен по адресу: ${PORT}`);
 });
